@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Future Cities Playground — Explore Tomorrow's Worlds</title>
+  <meta name="description" content="Explore four breathtaking future city scenarios. From neon-lit cyberpunk metropolises to floating sky citadels, dive into immersive sci-fi urban visions and design your own.">
+  <meta name="keywords" content="future cities, sci-fi, cyberpunk, urban design, interactive, exploration">
+  <meta name="theme-color" content="#0a0a1a">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Future Cities Playground">
+  <meta property="og:description" content="Explore breathtaking future city scenarios. Design your own tomorrow.">
+  <meta property="og:type" content="website">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Cursor glow effect -->
+  <div id="cursor-glow" aria-hidden="true"></div>
+  
+  <!-- Particle canvas -->
+  <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- Navigation -->
+  <nav id="main-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo" id="nav-logo">
+        <span class="logo-icon">◆</span>
+        <span class="logo-text">FUTURE<span class="logo-accent">CITIES</span></span>
+      </a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+        <span class="hamburger"></span>
+      </button>
+      <ul class="nav-links" id="nav-links" role="list">
+        <li><a href="#scenarios" class="nav-link" data-section="scenarios">Scenarios</a></li>
+        <li><a href="#configurator" class="nav-link" data-section="configurator">Configurator</a></li>
+        <li><a href="#about" class="nav-link" data-section="about">About</a></li>
+        <li><a href="#scenarios" class="nav-cta" id="nav-cta">Explore Now</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section id="hero" class="hero-section">
+    <div class="hero-bg">
+      <img src="assets/images/hero-cityscape.png" alt="" class="hero-bg-img" loading="eager">
+      <div class="hero-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge" aria-hidden="true">
+        <span class="badge-dot"></span>
+        <span>2076 — Cities of Tomorrow</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="hero-title-line" data-animate="slide-up" style="--delay: 0.1s">Explore the</span>
+        <span class="hero-title-line hero-title-gradient" data-animate="slide-up" style="--delay: 0.25s">Cities of Tomorrow</span>
+      </h1>
+      <p class="hero-subtitle" data-animate="fade-in" style="--delay: 0.5s">
+        Four breathtaking visions of future urban life. Neon metropolises, floating citadels, 
+        undersea kingdoms, and Martian colonies — all waiting for you to explore and customize.
+      </p>
+      <div class="hero-actions" data-animate="fade-in" style="--delay: 0.7s">
+        <a href="#scenarios" class="btn btn-primary" id="hero-explore-btn">
+          <span>Begin Exploration</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        </a>
+        <a href="#configurator" class="btn btn-ghost" id="hero-design-btn">
+          <span>Design Your City</span>
+        </a>
+      </div>
+      <div class="hero-stats" data-animate="fade-in" style="--delay: 0.9s">
+        <div class="stat">
+          <span class="stat-number" data-count="4">0</span>
+          <span class="stat-label">City Scenarios</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-number" data-count="16">0</span>
+          <span class="stat-label">Features</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-number" data-count="2076">0</span>
+          <span class="stat-label">Year Ahead</span>
+        </div>
+      </div>
+    </div>
+    <div class="scroll-indicator" data-animate="fade-in" style="--delay: 1.2s">
+      <span>Scroll to explore</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- Scenarios Section -->
+  <section id="scenarios" class="scenarios-section">
+    <div class="section-header">
+      <span class="section-tag" data-animate="slide-up">— City Scenarios</span>
+      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Four Visions of<br><span class="gradient-text">Urban Tomorrow</span></h2>
+      <p class="section-desc" data-animate="fade-in" style="--delay: 0.2s">
+        Each scenario imagines a radically different approach to urban life — from the pulsing 
+        neon streets to the serene depths of the ocean floor.
+      </p>
+    </div>
+
+    <!-- Scenario 1: Neon Metropolis -->
+    <article class="scenario-card" id="scenario-neon" data-scenario="neon" data-animate="slide-up">
+      <div class="scenario-visual">
+        <img src="assets/images/neon-metropolis.png" alt="Neon Metropolis - A cyberpunk city with towering skyscrapers and holographic displays" class="scenario-img" loading="lazy">
+        <div class="scenario-img-overlay"></div>
+        <span class="scenario-number">01</span>
+      </div>
+      <div class="scenario-content">
+        <div class="scenario-meta">
+          <span class="scenario-tag neon">Cyberpunk</span>
+          <span class="scenario-year">Est. 2057</span>
+        </div>
+        <h3 class="scenario-title">Neon Metropolis</h3>
+        <p class="scenario-hook">Where light never sleeps and data flows like rivers through canyons of chrome and glass.</p>
+        <ul class="scenario-features">
+          <li>
+            <span class="feature-icon">⚡</span>
+            <span>Quantum-mesh power grid — zero blackouts, zero waste</span>
+          </li>
+          <li>
+            <span class="feature-icon">🌐</span>
+            <span>Holographic overlay network with real-time city data</span>
+          </li>
+          <li>
+            <span class="feature-icon">🚀</span>
+            <span>Autonomous aerial transit — 3-minute commutes anywhere</span>
+          </li>
+          <li>
+            <span class="feature-icon">🛡️</span>
+            <span>AI-governed safety mesh with predictive incident response</span>
+          </li>
+        </ul>
+        <div class="scenario-motif">
+          <span class="motif-label">Motif</span>
+          <span class="motif-value">Vertical Infinity — towers stretching beyond the clouds</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- Scenario 2: Sky Citadel -->
+    <article class="scenario-card reverse" id="scenario-sky" data-scenario="sky" data-animate="slide-up">
+      <div class="scenario-visual">
+        <img src="assets/images/sky-citadel.png" alt="Sky Citadel - A floating city among the clouds with crystal towers" class="scenario-img" loading="lazy">
+        <div class="scenario-img-overlay"></div>
+        <span class="scenario-number">02</span>
+      </div>
+      <div class="scenario-content">
+        <div class="scenario-meta">
+          <span class="scenario-tag sky">Utopian</span>
+          <span class="scenario-year">Est. 2063</span>
+        </div>
+        <h3 class="scenario-title">Sky Citadel</h3>
+        <p class="scenario-hook">An archipelago of floating platforms where humanity touched the sky and decided to stay.</p>
+        <ul class="scenario-features">
+          <li>
+            <span class="feature-icon">☁️</span>
+            <span>Anti-gravity foundation platforms — self-stabilizing at 3,000m</span>
+          </li>
+          <li>
+            <span class="feature-icon">🌿</span>
+            <span>Bioluminescent sky-gardens with atmospheric carbon capture</span>
+          </li>
+          <li>
+            <span class="feature-icon">🔗</span>
+            <span>Light-bridge transit connecting 47 floating districts</span>
+          </li>
+          <li>
+            <span class="feature-icon">🌅</span>
+            <span>Panoramic living — 360° horizon views from every residence</span>
+          </li>
+        </ul>
+        <div class="scenario-motif">
+          <span class="motif-label">Motif</span>
+          <span class="motif-value">Eternal Sunrise — light cascading through crystal architecture</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- Scenario 3: Ocean Depths -->
+    <article class="scenario-card" id="scenario-ocean" data-scenario="ocean" data-animate="slide-up">
+      <div class="scenario-visual">
+        <img src="assets/images/ocean-depths.png" alt="Ocean Depths - An underwater domed city on the ocean floor" class="scenario-img" loading="lazy">
+        <div class="scenario-img-overlay"></div>
+        <span class="scenario-number">03</span>
+      </div>
+      <div class="scenario-content">
+        <div class="scenario-meta">
+          <span class="scenario-tag ocean">Aquatic</span>
+          <span class="scenario-year">Est. 2069</span>
+        </div>
+        <h3 class="scenario-title">Ocean Depths</h3>
+        <p class="scenario-hook">Beneath the waves, pressure becomes possibility. A civilization thriving in Earth's last frontier.</p>
+        <ul class="scenario-features">
+          <li>
+            <span class="feature-icon">🫧</span>
+            <span>Pressure-adaptive biodomes — seamless transition to 500m depth</span>
+          </li>
+          <li>
+            <span class="feature-icon">🐠</span>
+            <span>Symbiotic coral ecosystems integrated into city infrastructure</span>
+          </li>
+          <li>
+            <span class="feature-icon">🌊</span>
+            <span>Tidal energy converters powering entire city districts</span>
+          </li>
+          <li>
+            <span class="feature-icon">🔬</span>
+            <span>Deep-sea research labs with live marine observation decks</span>
+          </li>
+        </ul>
+        <div class="scenario-motif">
+          <span class="motif-label">Motif</span>
+          <span class="motif-value">Bioluminescent Pulse — living light guiding every path</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- Scenario 4: Mars Colony -->
+    <article class="scenario-card reverse" id="scenario-mars" data-scenario="mars" data-animate="slide-up">
+      <div class="scenario-visual">
+        <img src="assets/images/mars-colony.png" alt="Mars Colony - A terraformed city on the Martian surface" class="scenario-img" loading="lazy">
+        <div class="scenario-img-overlay"></div>
+        <span class="scenario-number">04</span>
+      </div>
+      <div class="scenario-content">
+        <div class="scenario-meta">
+          <span class="scenario-tag mars">Extraterrestrial</span>
+          <span class="scenario-year">Est. 2076</span>
+        </div>
+        <h3 class="scenario-title">Mars Colony</h3>
+        <p class="scenario-hook">Red dust. Green domes. The first human civilization on another world, proving we were always meant to wander.</p>
+        <ul class="scenario-features">
+          <li>
+            <span class="feature-icon">🏗️</span>
+            <span>Regolith 3D-printed habitats — built from Martian soil itself</span>
+          </li>
+          <li>
+            <span class="feature-icon">☀️</span>
+            <span>Concentrated solar arrays with dust-resistant nanocoating</span>
+          </li>
+          <li>
+            <span class="feature-icon">🧬</span>
+            <span>Terraforming gardens — gene-edited flora for CO₂ conversion</span>
+          </li>
+          <li>
+            <span class="feature-icon">🚄</span>
+            <span>Hyperloop tunnel network connecting 12 colony domes</span>
+          </li>
+        </ul>
+        <div class="scenario-motif">
+          <span class="motif-label">Motif</span>
+          <span class="motif-value">Iron Horizon — rust and renewal under twin moons</span>
+        </div>
+      </div>
+    </article>
+  </section>
+
+  <!-- Configurator Section -->
+  <section id="configurator" class="configurator-section">
+    <div class="section-header">
+      <span class="section-tag" data-animate="slide-up">— City Configurator</span>
+      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Design Your<br><span class="gradient-text">Dream City</span></h2>
+      <p class="section-desc" data-animate="fade-in" style="--delay: 0.2s">
+        Adjust the parameters below and watch your custom city come to life. 
+        Every choice shapes the soul of your urban future.
+      </p>
+    </div>
+
+    <div class="configurator-layout" data-animate="fade-in" style="--delay: 0.3s">
+      <div class="config-panel">
+        <div class="config-group">
+          <label class="config-label" for="config-environment">Environment</label>
+          <div class="config-select-wrap">
+            <select id="config-environment" class="config-select">
+              <option value="urban">Dense Urban</option>
+              <option value="coastal">Coastal Haven</option>
+              <option value="mountain">Mountain Ridge</option>
+              <option value="desert">Desert Oasis</option>
+              <option value="arctic">Arctic Frontier</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <label class="config-label" for="config-population">Population Density</label>
+          <div class="config-slider-wrap">
+            <input type="range" id="config-population" class="config-slider" min="1" max="100" value="60">
+            <div class="slider-labels">
+              <span>Sparse</span>
+              <span class="slider-value" id="pop-value">60%</span>
+              <span>Megacity</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <label class="config-label" for="config-energy">Energy Source</label>
+          <div class="config-toggle-group" id="config-energy" role="radiogroup" aria-label="Energy source">
+            <button class="config-toggle active" data-value="solar" role="radio" aria-checked="true">☀️ Solar</button>
+            <button class="config-toggle" data-value="fusion" role="radio" aria-checked="false">⚛️ Fusion</button>
+            <button class="config-toggle" data-value="wind" role="radio" aria-checked="false">💨 Wind</button>
+            <button class="config-toggle" data-value="tidal" role="radio" aria-checked="false">🌊 Tidal</button>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <label class="config-label" for="config-greenery">Green Coverage</label>
+          <div class="config-slider-wrap">
+            <input type="range" id="config-greenery" class="config-slider green" min="0" max="100" value="45">
+            <div class="slider-labels">
+              <span>Minimal</span>
+              <span class="slider-value" id="green-value">45%</span>
+              <span>Forest City</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <label class="config-label" for="config-transport">Transportation</label>
+          <div class="config-toggle-group" id="config-transport" role="radiogroup" aria-label="Transportation type">
+            <button class="config-toggle active" data-value="aerial" role="radio" aria-checked="true">🚁 Aerial</button>
+            <button class="config-toggle" data-value="hyperloop" role="radio" aria-checked="false">🚄 Hyperloop</button>
+            <button class="config-toggle" data-value="teleport" role="radio" aria-checked="false">✨ Teleport</button>
+          </div>
+        </div>
+
+        <div class="config-group">
+          <label class="config-label" for="config-tech">Tech Level</label>
+          <div class="config-slider-wrap">
+            <input type="range" id="config-tech" class="config-slider tech" min="1" max="100" value="75">
+            <div class="slider-labels">
+              <span>Near-future</span>
+              <span class="slider-value" id="tech-value">75%</span>
+              <span>Singularity</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="config-preview">
+        <div class="preview-card" id="preview-card">
+          <div class="preview-header">
+            <span class="preview-label">Your City Preview</span>
+            <span class="preview-score" id="preview-score">Livability: 82</span>
+          </div>
+          <div class="preview-visual" id="preview-visual">
+            <canvas id="city-canvas" width="600" height="400"></canvas>
+          </div>
+          <div class="preview-stats">
+            <div class="preview-stat" id="stat-sustainability">
+              <div class="stat-bar">
+                <div class="stat-fill" style="--fill: 72%"></div>
+              </div>
+              <span class="stat-name">Sustainability</span>
+              <span class="stat-val">72%</span>
+            </div>
+            <div class="preview-stat" id="stat-innovation">
+              <div class="stat-bar">
+                <div class="stat-fill" style="--fill: 85%"></div>
+              </div>
+              <span class="stat-name">Innovation</span>
+              <span class="stat-val">85%</span>
+            </div>
+            <div class="preview-stat" id="stat-quality">
+              <div class="stat-bar">
+                <div class="stat-fill" style="--fill: 68%"></div>
+              </div>
+              <span class="stat-name">Quality of Life</span>
+              <span class="stat-val">68%</span>
+            </div>
+            <div class="preview-stat" id="stat-resilience">
+              <div class="stat-bar">
+                <div class="stat-fill" style="--fill: 90%"></div>
+              </div>
+              <span class="stat-name">Resilience</span>
+              <span class="stat-val">90%</span>
+            </div>
+          </div>
+          <div class="preview-name-wrap">
+            <input type="text" id="city-name-input" class="city-name-input" placeholder="Name your city..." maxlength="30" aria-label="City name">
+            <button class="btn btn-primary btn-sm" id="save-city-btn">
+              <span>Save Blueprint</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section id="about" class="about-section">
+    <div class="section-header">
+      <span class="section-tag" data-animate="slide-up">— About the Project</span>
+      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Built for<br><span class="gradient-text">Dreamers & Builders</span></h2>
+    </div>
+    <div class="about-grid" data-animate="fade-in" style="--delay: 0.2s">
+      <div class="about-card">
+        <div class="about-icon">🔮</div>
+        <h3>Speculative Design</h3>
+        <p>Each scenario is grounded in real emerging technologies — quantum computing, bio-architecture, terraforming research — extrapolated to their thrilling conclusions.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">🎮</div>
+        <h3>Interactive Play</h3>
+        <p>The configurator isn't just eye candy. Adjust parameters and watch real-time feedback as your city's sustainability, innovation, and livability scores shift dynamically.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">♿</div>
+        <h3>Accessible by Design</h3>
+        <p>Built with WCAG AA compliance, keyboard navigation, and reduced-motion preferences. The future should be for everyone — including how we experience it online.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-icon">⚡</div>
+        <h3>Performance First</h3>
+        <p>Optimized animations, lazy-loaded assets, and efficient rendering. A premium experience that doesn't compromise on speed or battery life.</p>
+      </div>
+    </div>
+    
+    <div class="about-cta" data-animate="fade-in" style="--delay: 0.4s">
+      <p class="cta-text">Ready to shape the future?</p>
+      <a href="#scenarios" class="btn btn-primary btn-lg" id="about-explore-btn">
+        <span>Start Exploring</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="site-footer" class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon">◆</span>
+        <span class="logo-text">FUTURE<span class="logo-accent">CITIES</span></span>
+        <p class="footer-tagline">Imagining tomorrow, building today.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#hero">Home</a>
+        <a href="#scenarios">Scenarios</a>
+        <a href="#configurator">Configurator</a>
+        <a href="#about">About</a>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Future Cities Playground. A speculative design experiment.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
