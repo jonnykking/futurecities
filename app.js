@@ -1306,6 +1306,197 @@
   // Initial preview update
   updatePreview();
 
+  // ------------------------------------------
+  // #6 — DYNAMIC SECTION THEMING
+  // ------------------------------------------
+  // Create ambient glow overlay
+  const themeGlow = document.createElement('div');
+  themeGlow.id = 'theme-glow';
+  themeGlow.setAttribute('aria-hidden', 'true');
+  document.body.insertBefore(themeGlow, document.body.firstChild);
+
+  const themeColors = {
+    neon: {
+      glow: 'radial-gradient(ellipse at 50% 40%, rgba(0,240,255,0.07) 0%, rgba(168,85,247,0.03) 40%, transparent 70%)',
+      accent: '#00f0ff'
+    },
+    sky: {
+      glow: 'radial-gradient(ellipse at 50% 40%, rgba(167,139,250,0.07) 0%, rgba(192,132,252,0.03) 40%, transparent 70%)',
+      accent: '#a78bfa'
+    },
+    ocean: {
+      glow: 'radial-gradient(ellipse at 50% 40%, rgba(34,211,238,0.07) 0%, rgba(6,182,212,0.03) 40%, transparent 70%)',
+      accent: '#22d3ee'
+    },
+    mars: {
+      glow: 'radial-gradient(ellipse at 50% 40%, rgba(251,146,60,0.07) 0%, rgba(249,115,22,0.03) 40%, transparent 70%)',
+      accent: '#fb923c'
+    }
+  };
+
+  let currentTheme = '';
+
+  function updateTheme(scenarioKey) {
+    if (scenarioKey === currentTheme) return;
+    currentTheme = scenarioKey;
+
+    const theme = themeColors[scenarioKey];
+    if (theme) {
+      document.body.setAttribute('data-theme', scenarioKey);
+      themeGlow.style.background = theme.glow;
+      themeGlow.classList.add('active');
+
+      // Update cursor glow color
+      if (cursorGlow) {
+        cursorGlow.style.background = `radial-gradient(circle, ${theme.accent}18 0%, transparent 70%)`;
+      }
+    } else {
+      document.body.removeAttribute('data-theme');
+      themeGlow.classList.remove('active');
+
+      // Reset cursor glow
+      if (cursorGlow) {
+        cursorGlow.style.background = '';
+      }
+    }
+  }
+
+  // Observe which scenario card is in prominent view
+  const scenarioEls = document.querySelectorAll('.scenario-card[data-scenario]');
+  if (scenarioEls.length) {
+    const themeObserver = new IntersectionObserver((entries) => {
+      let bestEntry = null;
+      let bestRatio = 0;
+      entries.forEach(entry => {
+        if (entry.isIntersecting && entry.intersectionRatio > bestRatio) {
+          bestRatio = entry.intersectionRatio;
+          bestEntry = entry;
+        }
+      });
+      if (bestEntry && bestRatio > 0.25) {
+        updateTheme(bestEntry.target.dataset.scenario);
+      }
+    }, { threshold: [0.1, 0.25, 0.4, 0.6, 0.8] });
+
+    scenarioEls.forEach(el => themeObserver.observe(el));
+  }
+
+  // Reset theme when scrolled past scenarios section
+  const scenariosSectionEl = document.getElementById('scenarios');
+  if (scenariosSectionEl) {
+    const sectionExitObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          updateTheme('');
+        }
+      });
+    }, { threshold: 0 });
+    sectionExitObserver.observe(scenariosSectionEl);
+  }
+
+  // ------------------------------------------
+  // #4 — 3D HOLOGRAPHIC CARDS
+  // ------------------------------------------
+  if (!prefersReducedMotion && window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.scenario-card.clickable').forEach(card => {
+      const visual = card.querySelector('.scenario-visual');
+      if (!visual) return;
+
+      // Create glare element dynamically
+      const glare = document.createElement('div');
+      glare.className = 'card-glare';
+      glare.setAttribute('aria-hidden', 'true');
+      visual.appendChild(glare);
+
+      let rafId = null;
+
+      card.addEventListener('mousemove', (e) => {
+        if (rafId) cancelAnimationFrame(rafId);
+
+        rafId = requestAnimationFrame(() => {
+          const rect = visual.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;  // 0..1
+          const y = (e.clientY - rect.top) / rect.height;   // 0..1
+
+          // Calculate rotation based on cursor position
+          const rotateY = (x - 0.5) * 10;   // ±5 degrees
+          const rotateX = (0.5 - y) * 8;     // ±4 degrees
+
+          visual.style.transform =
+            `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+
+          // Move glare spot to follow cursor
+          glare.style.background =
+            `radial-gradient(circle at ${x * 100}% ${y * 100}%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 30%, transparent 60%)`;
+        });
+      });
+
+      card.addEventListener('mouseleave', () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        // Smooth reset
+        visual.style.transition = 'transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)';
+        visual.style.transform = '';
+        glare.style.background = '';
+
+        setTimeout(() => {
+          visual.style.transition = 'transform 0.15s ease-out, box-shadow 0.3s ease';
+        }, 500);
+      });
+    });
+  }
+
+  // ------------------------------------------
+  // #2 — SCROLLYTELLING: Stagger Reveal
+  // ------------------------------------------
+  if (!prefersReducedMotion) {
+    document.querySelectorAll('.scenario-card').forEach(card => {
+      const content = card.querySelector('.scenario-content');
+      if (!content) return;
+
+      // Collect all animatable items in order
+      const items = [];
+      const selectors = [
+        '.scenario-meta',
+        '.scenario-title',
+        '.scenario-hook',
+        '.scenario-features li',
+        '.scenario-motif'
+      ];
+
+      selectors.forEach(sel => {
+        content.querySelectorAll(sel).forEach(el => {
+          el.classList.add('reveal-item');
+          items.push(el);
+        });
+      });
+
+      // Observe the card for when it enters viewport
+      const staggerObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            card.classList.add('in-view');
+
+            // Stagger each item with 120ms delay
+            items.forEach((item, i) => {
+              setTimeout(() => {
+                item.classList.add('revealed');
+              }, 150 + i * 120);
+            });
+
+            staggerObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+      staggerObserver.observe(card);
+    });
+  } else {
+    // Reduced motion: make everything visible immediately
+    document.querySelectorAll('.scenario-card').forEach(card => {
+      card.classList.add('in-view');
+    });
+  }
+
   console.log('%c🏙️ Future Cities Playground', 'color: #00f0ff; font-size: 16px; font-weight: bold;');
   console.log('%cExploring tomorrow\'s urban visions.', 'color: #9898b8; font-size: 12px;');
 
