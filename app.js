@@ -813,17 +813,99 @@
     saveCityBtn.addEventListener('click', () => {
       const name = cityNameInput.value.trim() || 'Unnamed City';
       const scores = computeScores();
-
-      // Show toast
       showToast(`"${name}" blueprint saved! Livability: ${scores.livability}`);
-
-      // Haptic-like button feedback
       saveCityBtn.style.transform = 'scale(0.95)';
-      setTimeout(() => {
-        saveCityBtn.style.transform = '';
-      }, 150);
+      setTimeout(() => { saveCityBtn.style.transform = ''; }, 150);
     });
   }
+
+  // ------------------------------------------
+  // Export PNG
+  // ------------------------------------------
+  const exportPngBtn = document.getElementById('export-png-btn');
+  if (exportPngBtn && cityCanvas) {
+    exportPngBtn.addEventListener('click', () => {
+      renderCityCanvas(); // Ensure fresh render
+      const link = document.createElement('a');
+      const name = cityNameInput.value.trim() || 'future-city';
+      link.download = name.replace(/\s+/g, '-').toLowerCase() + '-blueprint.png';
+      link.href = cityCanvas.toDataURL('image/png');
+      link.click();
+      showToast('Blueprint exported as PNG!');
+    });
+  }
+
+  // ------------------------------------------
+  // Share URL
+  // ------------------------------------------
+  const shareUrlBtn = document.getElementById('share-url-btn');
+  if (shareUrlBtn) {
+    shareUrlBtn.addEventListener('click', () => {
+      const params = new URLSearchParams({
+        env: configState.environment,
+        pop: configState.population,
+        nrg: configState.energy,
+        grn: configState.greenery,
+        trn: configState.transport,
+        tch: configState.tech,
+        name: cityNameInput.value.trim() || ''
+      });
+      const url = window.location.origin + window.location.pathname + '?' + params.toString();
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('Shareable link copied to clipboard!');
+      }).catch(() => {
+        // Fallback
+        const input = document.createElement('input');
+        input.value = url;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast('Shareable link copied!');
+      });
+    });
+  }
+
+  // Load config from URL params on startup
+  (function loadFromURL() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('env')) {
+      configState.environment = params.get('env');
+      document.getElementById('config-environment').value = configState.environment;
+    }
+    if (params.has('pop')) {
+      configState.population = parseInt(params.get('pop'));
+      document.getElementById('config-population').value = configState.population;
+      document.getElementById('pop-value').textContent = configState.population + '%';
+    }
+    if (params.has('nrg')) {
+      configState.energy = params.get('nrg');
+      document.querySelectorAll('#config-energy .config-toggle').forEach(b => {
+        b.classList.toggle('active', b.dataset.value === configState.energy);
+        b.setAttribute('aria-checked', b.dataset.value === configState.energy);
+      });
+    }
+    if (params.has('grn')) {
+      configState.greenery = parseInt(params.get('grn'));
+      document.getElementById('config-greenery').value = configState.greenery;
+      document.getElementById('green-value').textContent = configState.greenery + '%';
+    }
+    if (params.has('trn')) {
+      configState.transport = params.get('trn');
+      document.querySelectorAll('#config-transport .config-toggle').forEach(b => {
+        b.classList.toggle('active', b.dataset.value === configState.transport);
+        b.setAttribute('aria-checked', b.dataset.value === configState.transport);
+      });
+    }
+    if (params.has('tch')) {
+      configState.tech = parseInt(params.get('tch'));
+      document.getElementById('config-tech').value = configState.tech;
+      document.getElementById('tech-value').textContent = configState.tech + '%';
+    }
+    if (params.has('name')) {
+      cityNameInput.value = params.get('name');
+    }
+  })();
 
   // ------------------------------------------
   // Toast Notification
@@ -842,6 +924,326 @@
     setTimeout(() => {
       toastEl.classList.remove('show');
     }, 3000);
+  }
+
+  // ------------------------------------------
+  // Scroll Progress Bar
+  // ------------------------------------------
+  const scrollProgress = document.getElementById('scroll-progress');
+  if (scrollProgress) {
+    window.addEventListener('scroll', throttle(() => {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      scrollProgress.style.width = progress + '%';
+    }, 30));
+  }
+
+  // ------------------------------------------
+  // Hero Morph Text Animation
+  // ------------------------------------------
+  const morphEl = document.getElementById('morph-text');
+  if (morphEl && !prefersReducedMotion) {
+    const phrases = ['Cities of Tomorrow', 'World of 2076', 'Urban Future', 'Next Frontier', 'Dream Cityscape'];
+    let phraseIndex = 0;
+
+    setInterval(() => {
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+
+      // Morph out
+      morphEl.classList.add('morphing-out');
+
+      setTimeout(() => {
+        morphEl.textContent = phrases[phraseIndex];
+        morphEl.classList.remove('morphing-out');
+        morphEl.classList.add('morphing-in');
+
+        // Force reflow
+        void morphEl.offsetWidth;
+
+        // Reset to visible
+        requestAnimationFrame(() => {
+          morphEl.classList.remove('morphing-in');
+        });
+      }, 400);
+    }, 4000);
+  }
+
+  // ------------------------------------------
+  // Scenario Detail Modal
+  // ------------------------------------------
+  const scenarioData = {
+    neon: {
+      title: 'Neon Metropolis',
+      tag: 'Cyberpunk',
+      tagClass: 'neon',
+      img: 'assets/images/neon-metropolis.png',
+      hook: 'Where light never sleeps and data flows like rivers through canyons of chrome and glass.',
+      motif: 'Vertical Infinity — towers stretching beyond the clouds',
+      features: [
+        { icon: '⚡', text: 'Quantum-mesh power grid — zero blackouts, zero waste' },
+        { icon: '🌐', text: 'Holographic overlay network with real-time city data' },
+        { icon: '🚀', text: 'Autonomous aerial transit — 3-minute commutes anywhere' },
+        { icon: '🛡️', text: 'AI-governed safety mesh with predictive incident response' }
+      ],
+      lore: 'Founded in 2057 by a consortium of tech megacorps, the Neon Metropolis rose from the bones of old-world cities. Every surface is a display. Every molecule of air is tracked. Privacy is a luxury commodity, but so is boredom — because in the Neon Metropolis, the city itself is alive, adapting to your mood, your movement, your heartbeat. The question isn\'t whether you can live here. It\'s whether you can ever leave.'
+    },
+    sky: {
+      title: 'Sky Citadel',
+      tag: 'Utopian',
+      tagClass: 'sky',
+      img: 'assets/images/sky-citadel.png',
+      hook: 'An archipelago of floating platforms where humanity touched the sky and decided to stay.',
+      motif: 'Eternal Sunrise — light cascading through crystal architecture',
+      features: [
+        { icon: '☁️', text: 'Anti-gravity foundation platforms — self-stabilizing at 3,000m' },
+        { icon: '🌿', text: 'Bioluminescent sky-gardens with atmospheric carbon capture' },
+        { icon: '🔗', text: 'Light-bridge transit connecting 47 floating districts' },
+        { icon: '🌅', text: 'Panoramic living — 360° horizon views from every residence' }
+      ],
+      lore: 'When the floods came, they didn\'t just retreat — they ascended. Using breakthrough anti-gravity lattice technology, the architects of the Sky Citadel engineered platforms that ride the atmosphere itself. Residents wake to sunrises below them. Children grow up knowing the horizon as a circle, not a line. It\'s humanity\'s boldest declaration: the ground was never meant to hold us.'
+    },
+    ocean: {
+      title: 'Ocean Depths',
+      tag: 'Aquatic',
+      tagClass: 'ocean',
+      img: 'assets/images/ocean-depths.png',
+      hook: 'Beneath the waves, pressure becomes possibility. A civilization thriving in Earth\'s last frontier.',
+      motif: 'Bioluminescent Pulse — living light guiding every path',
+      features: [
+        { icon: '🫧', text: 'Pressure-adaptive biodomes — seamless transition to 500m depth' },
+        { icon: '🐠', text: 'Symbiotic coral ecosystems integrated into city infrastructure' },
+        { icon: '🌊', text: 'Tidal energy converters powering entire city districts' },
+        { icon: '🔬', text: 'Deep-sea research labs with live marine observation decks' }
+      ],
+      lore: 'Marine biologist Dr. Yuki Tanaka once said: "We knew more about Mars than our own ocean floor." Ocean Depths changed that. Built at crushing depths using self-healing polymer domes, this city doesn\'t fight the ocean — it collaborates with it. Coral structures double as load-bearing walls. Bioluminescent organisms replace electricity in ambient lighting. Here, architecture breathes.'
+    },
+    mars: {
+      title: 'Mars Colony',
+      tag: 'Extraterrestrial',
+      tagClass: 'mars',
+      img: 'assets/images/mars-colony.png',
+      hook: 'Red dust. Green domes. The first human civilization on another world, proving we were always meant to wander.',
+      motif: 'Iron Horizon — rust and renewal under twin moons',
+      features: [
+        { icon: '🏗️', text: 'Regolith 3D-printed habitats — built from Martian soil itself' },
+        { icon: '☀️', text: 'Concentrated solar arrays with dust-resistant nanocoating' },
+        { icon: '🧬', text: 'Terraforming gardens — gene-edited flora for CO₂ conversion' },
+        { icon: '🚄', text: 'Hyperloop tunnel network connecting 12 colony domes' }
+      ],
+      lore: 'The first colonists arrived in 2071 — 142 souls crammed into three landers, carrying enough seeds to start a world. Five years later, the first Martian-born child took her first breath under an amber sky. The Mars Colony isn\'t just an outpost; it\'s proof that human stubbornness, when aimed at the stars, can move mountains — even ones on another planet.'
+    }
+  };
+
+  const modal = document.getElementById('scenario-modal');
+  const modalClose = document.getElementById('modal-close');
+
+  function openScenarioModal(scenarioKey) {
+    const data = scenarioData[scenarioKey];
+    if (!data || !modal) return;
+
+    document.getElementById('modal-img').src = data.img;
+    document.getElementById('modal-img').alt = data.title;
+    document.getElementById('modal-tag').textContent = data.tag;
+    document.getElementById('modal-tag').className = 'scenario-tag ' + data.tagClass;
+    document.getElementById('modal-title').textContent = data.title;
+    document.getElementById('modal-hook').textContent = data.hook;
+    document.getElementById('modal-motif-value').textContent = data.motif;
+    document.getElementById('modal-lore').textContent = data.lore;
+
+    const featuresList = document.getElementById('modal-features');
+    featuresList.innerHTML = data.features.map(f =>
+      `<li><span class="feature-icon">${f.icon}</span><span>${f.text}</span></li>`
+    ).join('');
+
+    modal.classList.add('active');
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    // Configure button: scroll to configurator
+    const configBtn = document.getElementById('modal-configure-btn');
+    configBtn.onclick = () => {
+      closeModal();
+      setTimeout(() => {
+        document.getElementById('configurator').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    };
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => { modal.hidden = true; }, 500);
+  }
+
+  if (modalClose) {
+    modalClose.addEventListener('click', closeModal);
+  }
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+  }
+
+  // Make scenario cards clickable
+  document.querySelectorAll('.scenario-card.clickable').forEach(card => {
+    const handler = () => {
+      const key = card.dataset.scenario;
+      if (key) openScenarioModal(key);
+    };
+    card.addEventListener('click', handler);
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        handler();
+      }
+    });
+  });
+
+  // ------------------------------------------
+  // Compare Mode
+  // ------------------------------------------
+  const compareToggle = document.getElementById('compare-toggle');
+  const comparePanel = document.getElementById('compare-panel');
+  const compareA = document.getElementById('compare-a');
+  const compareB = document.getElementById('compare-b');
+  const compareGrid = document.getElementById('compare-grid');
+
+  if (compareToggle && comparePanel) {
+    compareToggle.addEventListener('click', () => {
+      const isHidden = comparePanel.hidden;
+      comparePanel.hidden = !isHidden;
+      compareToggle.querySelector('span').textContent = isHidden ? 'Hide Compare' : 'Compare Scenarios';
+    });
+  }
+
+  function renderCompare() {
+    if (!compareGrid || !compareA || !compareB) return;
+    const a = compareA.value;
+    const b = compareB.value;
+    if (!a || !b || a === b) {
+      compareGrid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--c-text-muted);font-size:var(--f-size-sm);">Select two different scenarios above to compare.</p>';
+      return;
+    }
+    const dataA = scenarioData[a];
+    const dataB = scenarioData[b];
+    if (!dataA || !dataB) return;
+
+    compareGrid.innerHTML = [dataA, dataB].map(d => `
+      <div class="compare-card">
+        <span class="scenario-tag ${d.tagClass}" style="margin-bottom:var(--s-md);display:inline-block">${d.tag}</span>
+        <h4>${d.title}</h4>
+        <p style="font-size:var(--f-size-sm);color:var(--c-text-secondary);margin-bottom:var(--s-md);font-style:italic;line-height:1.6">${d.hook}</p>
+        <ul class="scenario-features">
+          ${d.features.map(f => `<li><span class="feature-icon">${f.icon}</span><span>${f.text}</span></li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+  }
+
+  if (compareA) compareA.addEventListener('change', renderCompare);
+  if (compareB) compareB.addEventListener('change', renderCompare);
+
+  // ------------------------------------------
+  // Ambient Sound (Web Audio API)
+  // ------------------------------------------
+  const ambientToggle = document.getElementById('ambient-toggle');
+  const ambientIcon = document.getElementById('ambient-icon');
+  let audioCtx = null;
+  let ambientPlaying = false;
+  let ambientNodes = [];
+
+  function startAmbientSound() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    // Deep drone
+    const osc1 = audioCtx.createOscillator();
+    const gain1 = audioCtx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.value = 55; // Low A
+    gain1.gain.value = 0;
+    gain1.gain.linearRampToValueAtTime(0.06, audioCtx.currentTime + 2);
+    osc1.connect(gain1);
+    gain1.connect(audioCtx.destination);
+    osc1.start();
+
+    // Ethereal pad
+    const osc2 = audioCtx.createOscillator();
+    const gain2 = audioCtx.createGain();
+    const filter = audioCtx.createBiquadFilter();
+    osc2.type = 'triangle';
+    osc2.frequency.value = 220;
+    filter.type = 'lowpass';
+    filter.frequency.value = 400;
+    filter.Q.value = 5;
+    gain2.gain.value = 0;
+    gain2.gain.linearRampToValueAtTime(0.025, audioCtx.currentTime + 3);
+    osc2.connect(filter);
+    filter.connect(gain2);
+    gain2.connect(audioCtx.destination);
+    osc2.start();
+
+    // Very subtle high shimmer
+    const osc3 = audioCtx.createOscillator();
+    const gain3 = audioCtx.createGain();
+    osc3.type = 'sine';
+    osc3.frequency.value = 880;
+    gain3.gain.value = 0;
+    gain3.gain.linearRampToValueAtTime(0.008, audioCtx.currentTime + 4);
+    osc3.connect(gain3);
+    gain3.connect(audioCtx.destination);
+    osc3.start();
+
+    // Slow LFO on pad frequency for movement
+    const lfo = audioCtx.createOscillator();
+    const lfoGain = audioCtx.createGain();
+    lfo.type = 'sine';
+    lfo.frequency.value = 0.1; // Very slow
+    lfoGain.gain.value = 15;
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc2.frequency);
+    lfo.start();
+
+    ambientNodes = [
+      { osc: osc1, gain: gain1 },
+      { osc: osc2, gain: gain2 },
+      { osc: osc3, gain: gain3 },
+      { osc: lfo, gain: lfoGain }
+    ];
+  }
+
+  function stopAmbientSound() {
+    ambientNodes.forEach(n => {
+      try {
+        n.gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1);
+        setTimeout(() => { try { n.osc.stop(); } catch (e) { } }, 1200);
+      } catch (e) { }
+    });
+    ambientNodes = [];
+  }
+
+  if (ambientToggle) {
+    ambientToggle.addEventListener('click', () => {
+      ambientPlaying = !ambientPlaying;
+      if (ambientPlaying) {
+        startAmbientSound();
+        ambientToggle.classList.add('active');
+        ambientIcon.textContent = '🔊';
+        showToast('Ambient city sounds enabled');
+      } else {
+        stopAmbientSound();
+        ambientToggle.classList.remove('active');
+        ambientIcon.textContent = '🔇';
+        showToast('Ambient sounds muted');
+      }
+    });
   }
 
   // ------------------------------------------
@@ -867,12 +1269,16 @@
   // Keyboard Navigation
   // ------------------------------------------
   document.addEventListener('keydown', (e) => {
-    // Escape closes mobile menu
-    if (e.key === 'Escape' && navLinks.classList.contains('open')) {
-      navLinks.classList.remove('open');
-      navToggle.classList.remove('active');
-      navToggle.setAttribute('aria-expanded', 'false');
-      navToggle.focus();
+    // Escape closes mobile menu or modal
+    if (e.key === 'Escape') {
+      if (modal && modal.classList.contains('active')) {
+        closeModal();
+      } else if (navLinks.classList.contains('open')) {
+        navLinks.classList.remove('open');
+        navToggle.classList.remove('active');
+        navToggle.setAttribute('aria-expanded', 'false');
+        navToggle.focus();
+      }
     }
   });
 

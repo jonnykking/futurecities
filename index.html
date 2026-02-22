@@ -1,31 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Future Cities Playground — Explore Tomorrow's Worlds</title>
-  <meta name="description" content="Explore four breathtaking future city scenarios. From neon-lit cyberpunk metropolises to floating sky citadels, dive into immersive sci-fi urban visions and design your own.">
+  <meta name="description"
+    content="Explore four breathtaking future city scenarios. From neon-lit cyberpunk metropolises to floating sky citadels, dive into immersive sci-fi urban visions and design your own.">
   <meta name="keywords" content="future cities, sci-fi, cyberpunk, urban design, interactive, exploration">
   <meta name="theme-color" content="#0a0a1a">
-  
+
+  <!-- Favicon (inline SVG diamond) -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2300f0ff'/><stop offset='100%25' stop-color='%23a855f7'/></linearGradient></defs><polygon points='50,5 95,50 50,95 5,50' fill='url(%23g)'/></svg>"
+    type="image/svg+xml">
+
   <!-- Open Graph -->
   <meta property="og:title" content="Future Cities Playground">
   <meta property="og:description" content="Explore breathtaking future city scenarios. Design your own tomorrow.">
   <meta property="og:type" content="website">
-  
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+  <!-- Skip to content (accessibility) -->
+  <a href="#scenarios" class="skip-link" id="skip-link">Skip to main content</a>
+
+  <!-- Scroll progress bar -->
+  <div id="scroll-progress" class="scroll-progress" aria-hidden="true"></div>
+
   <!-- Cursor glow effect -->
   <div id="cursor-glow" aria-hidden="true"></div>
-  
+
   <!-- Particle canvas -->
   <canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+  <!-- Ambient Sound Toggle -->
+  <button id="ambient-toggle" class="ambient-toggle" aria-label="Toggle ambient sound"
+    title="Toggle ambient city sounds">
+    <span class="ambient-icon" id="ambient-icon">🔇</span>
+  </button>
 
   <!-- Navigation -->
   <nav id="main-nav" role="navigation" aria-label="Main navigation">
@@ -59,16 +81,20 @@
       </div>
       <h1 class="hero-title">
         <span class="hero-title-line" data-animate="slide-up" style="--delay: 0.1s">Explore the</span>
-        <span class="hero-title-line hero-title-gradient" data-animate="slide-up" style="--delay: 0.25s">Cities of Tomorrow</span>
+        <span class="hero-title-line hero-title-gradient" data-animate="slide-up" style="--delay: 0.25s">
+          <span id="morph-text" class="morph-text">Cities of Tomorrow</span>
+        </span>
       </h1>
       <p class="hero-subtitle" data-animate="fade-in" style="--delay: 0.5s">
-        Four breathtaking visions of future urban life. Neon metropolises, floating citadels, 
+        Four breathtaking visions of future urban life. Neon metropolises, floating citadels,
         undersea kingdoms, and Martian colonies — all waiting for you to explore and customize.
       </p>
       <div class="hero-actions" data-animate="fade-in" style="--delay: 0.7s">
         <a href="#scenarios" class="btn btn-primary" id="hero-explore-btn">
           <span>Begin Exploration</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M7 17L17 7M17 7H7M17 7v10" />
+          </svg>
         </a>
         <a href="#configurator" class="btn btn-ghost" id="hero-design-btn">
           <span>Design Your City</span>
@@ -97,23 +123,76 @@
     </div>
   </section>
 
+  <!-- Section Divider: Hero → Scenarios -->
+  <div class="section-divider" aria-hidden="true">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,40 Q360,80 720,40 T1440,40 L1440,80 L0,80 Z" fill="var(--c-bg-deep)" opacity="0.5" />
+      <path d="M0,50 Q360,90 720,50 T1440,50 L1440,80 L0,80 Z" fill="var(--c-bg-deep)" />
+    </svg>
+  </div>
+
   <!-- Scenarios Section -->
   <section id="scenarios" class="scenarios-section">
     <div class="section-header">
       <span class="section-tag" data-animate="slide-up">— City Scenarios</span>
-      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Four Visions of<br><span class="gradient-text">Urban Tomorrow</span></h2>
+      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Four Visions of<br><span
+          class="gradient-text">Urban Tomorrow</span></h2>
       <p class="section-desc" data-animate="fade-in" style="--delay: 0.2s">
-        Each scenario imagines a radically different approach to urban life — from the pulsing 
-        neon streets to the serene depths of the ocean floor.
+        Each scenario imagines a radically different approach to urban life — from the pulsing
+        neon streets to the serene depths of the ocean floor. <strong>Click any card</strong> to dive deeper.
       </p>
+      <!-- Compare toggle -->
+      <button class="btn btn-ghost btn-sm compare-toggle" id="compare-toggle" data-animate="fade-in"
+        style="--delay: 0.3s">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 3h5v5M8 3H3v5M3 16v5h5M21 16v5h-5" />
+        </svg>
+        <span>Compare Scenarios</span>
+      </button>
+    </div>
+
+    <!-- Compare Panel (hidden by default) -->
+    <div class="compare-panel" id="compare-panel" hidden>
+      <div class="compare-header">
+        <h3>Compare Scenarios</h3>
+        <p>Select two scenarios below to compare them side by side.</p>
+      </div>
+      <div class="compare-selectors">
+        <div class="compare-selector">
+          <label for="compare-a">Scenario A</label>
+          <select id="compare-a" class="config-select">
+            <option value="">— Select —</option>
+            <option value="neon">Neon Metropolis</option>
+            <option value="sky">Sky Citadel</option>
+            <option value="ocean">Ocean Depths</option>
+            <option value="mars">Mars Colony</option>
+          </select>
+        </div>
+        <span class="compare-vs">VS</span>
+        <div class="compare-selector">
+          <label for="compare-b">Scenario B</label>
+          <select id="compare-b" class="config-select">
+            <option value="">— Select —</option>
+            <option value="neon">Neon Metropolis</option>
+            <option value="sky">Sky Citadel</option>
+            <option value="ocean">Ocean Depths</option>
+            <option value="mars">Mars Colony</option>
+          </select>
+        </div>
+      </div>
+      <div class="compare-grid" id="compare-grid"></div>
     </div>
 
     <!-- Scenario 1: Neon Metropolis -->
-    <article class="scenario-card" id="scenario-neon" data-scenario="neon" data-animate="slide-up">
+    <article class="scenario-card clickable" id="scenario-neon" data-scenario="neon" data-animate="slide-up"
+      role="button" tabindex="0" aria-label="View Neon Metropolis details">
       <div class="scenario-visual">
-        <img src="assets/images/neon-metropolis.png" alt="Neon Metropolis - A cyberpunk city with towering skyscrapers and holographic displays" class="scenario-img" loading="lazy">
+        <img src="assets/images/neon-metropolis.png"
+          alt="Neon Metropolis - A cyberpunk city with towering skyscrapers and holographic displays"
+          class="scenario-img" loading="lazy">
         <div class="scenario-img-overlay"></div>
         <span class="scenario-number">01</span>
+        <span class="scenario-expand-hint">Click to explore →</span>
       </div>
       <div class="scenario-content">
         <div class="scenario-meta">
@@ -121,7 +200,8 @@
           <span class="scenario-year">Est. 2057</span>
         </div>
         <h3 class="scenario-title">Neon Metropolis</h3>
-        <p class="scenario-hook">Where light never sleeps and data flows like rivers through canyons of chrome and glass.</p>
+        <p class="scenario-hook">Where light never sleeps and data flows like rivers through canyons of chrome and
+          glass.</p>
         <ul class="scenario-features">
           <li>
             <span class="feature-icon">⚡</span>
@@ -148,11 +228,14 @@
     </article>
 
     <!-- Scenario 2: Sky Citadel -->
-    <article class="scenario-card reverse" id="scenario-sky" data-scenario="sky" data-animate="slide-up">
+    <article class="scenario-card reverse clickable" id="scenario-sky" data-scenario="sky" data-animate="slide-up"
+      role="button" tabindex="0" aria-label="View Sky Citadel details">
       <div class="scenario-visual">
-        <img src="assets/images/sky-citadel.png" alt="Sky Citadel - A floating city among the clouds with crystal towers" class="scenario-img" loading="lazy">
+        <img src="assets/images/sky-citadel.png"
+          alt="Sky Citadel - A floating city among the clouds with crystal towers" class="scenario-img" loading="lazy">
         <div class="scenario-img-overlay"></div>
         <span class="scenario-number">02</span>
+        <span class="scenario-expand-hint">Click to explore →</span>
       </div>
       <div class="scenario-content">
         <div class="scenario-meta">
@@ -160,7 +243,8 @@
           <span class="scenario-year">Est. 2063</span>
         </div>
         <h3 class="scenario-title">Sky Citadel</h3>
-        <p class="scenario-hook">An archipelago of floating platforms where humanity touched the sky and decided to stay.</p>
+        <p class="scenario-hook">An archipelago of floating platforms where humanity touched the sky and decided to
+          stay.</p>
         <ul class="scenario-features">
           <li>
             <span class="feature-icon">☁️</span>
@@ -187,11 +271,14 @@
     </article>
 
     <!-- Scenario 3: Ocean Depths -->
-    <article class="scenario-card" id="scenario-ocean" data-scenario="ocean" data-animate="slide-up">
+    <article class="scenario-card clickable" id="scenario-ocean" data-scenario="ocean" data-animate="slide-up"
+      role="button" tabindex="0" aria-label="View Ocean Depths details">
       <div class="scenario-visual">
-        <img src="assets/images/ocean-depths.png" alt="Ocean Depths - An underwater domed city on the ocean floor" class="scenario-img" loading="lazy">
+        <img src="assets/images/ocean-depths.png" alt="Ocean Depths - An underwater domed city on the ocean floor"
+          class="scenario-img" loading="lazy">
         <div class="scenario-img-overlay"></div>
         <span class="scenario-number">03</span>
+        <span class="scenario-expand-hint">Click to explore →</span>
       </div>
       <div class="scenario-content">
         <div class="scenario-meta">
@@ -199,7 +286,8 @@
           <span class="scenario-year">Est. 2069</span>
         </div>
         <h3 class="scenario-title">Ocean Depths</h3>
-        <p class="scenario-hook">Beneath the waves, pressure becomes possibility. A civilization thriving in Earth's last frontier.</p>
+        <p class="scenario-hook">Beneath the waves, pressure becomes possibility. A civilization thriving in Earth's
+          last frontier.</p>
         <ul class="scenario-features">
           <li>
             <span class="feature-icon">🫧</span>
@@ -226,11 +314,14 @@
     </article>
 
     <!-- Scenario 4: Mars Colony -->
-    <article class="scenario-card reverse" id="scenario-mars" data-scenario="mars" data-animate="slide-up">
+    <article class="scenario-card reverse clickable" id="scenario-mars" data-scenario="mars" data-animate="slide-up"
+      role="button" tabindex="0" aria-label="View Mars Colony details">
       <div class="scenario-visual">
-        <img src="assets/images/mars-colony.png" alt="Mars Colony - A terraformed city on the Martian surface" class="scenario-img" loading="lazy">
+        <img src="assets/images/mars-colony.png" alt="Mars Colony - A terraformed city on the Martian surface"
+          class="scenario-img" loading="lazy">
         <div class="scenario-img-overlay"></div>
         <span class="scenario-number">04</span>
+        <span class="scenario-expand-hint">Click to explore →</span>
       </div>
       <div class="scenario-content">
         <div class="scenario-meta">
@@ -238,7 +329,8 @@
           <span class="scenario-year">Est. 2076</span>
         </div>
         <h3 class="scenario-title">Mars Colony</h3>
-        <p class="scenario-hook">Red dust. Green domes. The first human civilization on another world, proving we were always meant to wander.</p>
+        <p class="scenario-hook">Red dust. Green domes. The first human civilization on another world, proving we were
+          always meant to wander.</p>
         <ul class="scenario-features">
           <li>
             <span class="feature-icon">🏗️</span>
@@ -265,13 +357,65 @@
     </article>
   </section>
 
+  <!-- Scenario Detail Modal -->
+  <div class="modal-overlay" id="scenario-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close" aria-label="Close dialog">&times;</button>
+      <div class="modal-hero" id="modal-hero">
+        <img src="" alt="" id="modal-img" class="modal-img">
+        <div class="modal-hero-overlay"></div>
+        <div class="modal-hero-info">
+          <span class="scenario-tag" id="modal-tag"></span>
+          <h2 class="modal-title" id="modal-title"></h2>
+        </div>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hook" id="modal-hook"></p>
+        <div class="modal-details">
+          <div class="modal-section">
+            <h3>Key Features</h3>
+            <ul id="modal-features" class="scenario-features"></ul>
+          </div>
+          <div class="modal-section">
+            <h3>Design Motif</h3>
+            <div class="scenario-motif" id="modal-motif">
+              <span class="motif-label">Motif</span>
+              <span class="motif-value" id="modal-motif-value"></span>
+            </div>
+          </div>
+          <div class="modal-section">
+            <h3>Deeper Lore</h3>
+            <p class="modal-lore" id="modal-lore"></p>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="modal-configure-btn">
+            <span>Configure This City</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M7 17L17 7M17 7H7M17 7v10" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section Divider: Scenarios → Configurator -->
+  <div class="section-divider" aria-hidden="true">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,20 C480,80 960,0 1440,60 L1440,80 L0,80 Z" fill="var(--c-bg-secondary)" opacity="0.4" />
+      <path d="M0,40 C480,90 960,10 1440,70 L1440,80 L0,80 Z" fill="var(--c-bg-secondary)" opacity="0.7" />
+    </svg>
+  </div>
+
   <!-- Configurator Section -->
   <section id="configurator" class="configurator-section">
     <div class="section-header">
       <span class="section-tag" data-animate="slide-up">— City Configurator</span>
-      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Design Your<br><span class="gradient-text">Dream City</span></h2>
+      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Design Your<br><span
+          class="gradient-text">Dream City</span></h2>
       <p class="section-desc" data-animate="fade-in" style="--delay: 0.2s">
-        Adjust the parameters below and watch your custom city come to life. 
+        Adjust the parameters below and watch your custom city come to life.
         Every choice shapes the soul of your urban future.
       </p>
     </div>
@@ -387,9 +531,25 @@
             </div>
           </div>
           <div class="preview-name-wrap">
-            <input type="text" id="city-name-input" class="city-name-input" placeholder="Name your city..." maxlength="30" aria-label="City name">
+            <input type="text" id="city-name-input" class="city-name-input" placeholder="Name your city..."
+              maxlength="30" aria-label="City name">
             <button class="btn btn-primary btn-sm" id="save-city-btn">
               <span>Save Blueprint</span>
+            </button>
+          </div>
+          <div class="preview-export-wrap">
+            <button class="btn btn-ghost btn-sm" id="export-png-btn" title="Download as PNG">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" />
+              </svg>
+              <span>Export PNG</span>
+            </button>
+            <button class="btn btn-ghost btn-sm" id="share-url-btn" title="Copy shareable link">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+              </svg>
+              <span>Share Link</span>
             </button>
           </div>
         </div>
@@ -397,40 +557,55 @@
     </div>
   </section>
 
+  <!-- Section Divider: Configurator → About -->
+  <div class="section-divider" aria-hidden="true">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,60 Q360,0 720,40 T1440,20 L1440,80 L0,80 Z" fill="var(--c-bg-deep)" opacity="0.5" />
+      <path d="M0,70 Q360,20 720,50 T1440,30 L1440,80 L0,80 Z" fill="var(--c-bg-deep)" />
+    </svg>
+  </div>
+
   <!-- About Section -->
   <section id="about" class="about-section">
     <div class="section-header">
       <span class="section-tag" data-animate="slide-up">— About the Project</span>
-      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Built for<br><span class="gradient-text">Dreamers & Builders</span></h2>
+      <h2 class="section-title" data-animate="slide-up" style="--delay: 0.1s">Built for<br><span
+          class="gradient-text">Dreamers & Builders</span></h2>
     </div>
     <div class="about-grid" data-animate="fade-in" style="--delay: 0.2s">
       <div class="about-card">
         <div class="about-icon">🔮</div>
         <h3>Speculative Design</h3>
-        <p>Each scenario is grounded in real emerging technologies — quantum computing, bio-architecture, terraforming research — extrapolated to their thrilling conclusions.</p>
+        <p>Each scenario is grounded in real emerging technologies — quantum computing, bio-architecture, terraforming
+          research — extrapolated to their thrilling conclusions.</p>
       </div>
       <div class="about-card">
         <div class="about-icon">🎮</div>
         <h3>Interactive Play</h3>
-        <p>The configurator isn't just eye candy. Adjust parameters and watch real-time feedback as your city's sustainability, innovation, and livability scores shift dynamically.</p>
+        <p>The configurator isn't just eye candy. Adjust parameters and watch real-time feedback as your city's
+          sustainability, innovation, and livability scores shift dynamically.</p>
       </div>
       <div class="about-card">
         <div class="about-icon">♿</div>
         <h3>Accessible by Design</h3>
-        <p>Built with WCAG AA compliance, keyboard navigation, and reduced-motion preferences. The future should be for everyone — including how we experience it online.</p>
+        <p>Built with WCAG AA compliance, keyboard navigation, and reduced-motion preferences. The future should be for
+          everyone — including how we experience it online.</p>
       </div>
       <div class="about-card">
         <div class="about-icon">⚡</div>
         <h3>Performance First</h3>
-        <p>Optimized animations, lazy-loaded assets, and efficient rendering. A premium experience that doesn't compromise on speed or battery life.</p>
+        <p>Optimized animations, lazy-loaded assets, and efficient rendering. A premium experience that doesn't
+          compromise on speed or battery life.</p>
       </div>
     </div>
-    
+
     <div class="about-cta" data-animate="fade-in" style="--delay: 0.4s">
       <p class="cta-text">Ready to shape the future?</p>
       <a href="#scenarios" class="btn btn-primary btn-lg" id="about-explore-btn">
         <span>Start Exploring</span>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M7 17L17 7M17 7H7M17 7v10" />
+        </svg>
       </a>
     </div>
   </section>
@@ -457,4 +632,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>
