@@ -90,7 +90,7 @@
         this.speedY = (Math.random() - 0.5) * 0.3;
         this.opacity = Math.random() * 0.5 + 0.1;
         this.color = Math.random() > 0.6
-          ? 'rgba(0, 240, 255,' 
+          ? 'rgba(0, 240, 255,'
           : Math.random() > 0.4
             ? 'rgba(168, 85, 247,'
             : 'rgba(244, 114, 182,';
@@ -99,7 +99,7 @@
         this.x += this.speedX;
         this.y += this.speedY;
         if (this.x < -10 || this.x > particleCanvas.width + 10 ||
-            this.y < -10 || this.y > particleCanvas.height + 10) {
+          this.y < -10 || this.y > particleCanvas.height + 10) {
           this.reset();
         }
       }
@@ -156,7 +156,7 @@
   let lastScrollY = 0;
   window.addEventListener('scroll', throttle(() => {
     const scrollY = window.scrollY;
-    
+
     if (scrollY > 50) {
       nav.classList.add('scrolled');
     } else {
@@ -401,239 +401,362 @@
   const cityCanvas = document.getElementById('city-canvas');
   const cityCtx = cityCanvas ? cityCanvas.getContext('2d') : null;
 
-  function renderCityCanvas() {
-    if (!cityCtx) return;
-
-    const w = cityCanvas.width = cityCanvas.offsetWidth * (window.devicePixelRatio || 1);
-    const h = cityCanvas.height = cityCanvas.offsetHeight * (window.devicePixelRatio || 1);
-    const scale = w / 600;
-
-    cityCtx.clearRect(0, 0, w, h);
-
-    // Theme colors based on environment
-    const themes = {
-      urban:   { sky1: '#0a0a2a', sky2: '#1a0a30', ground: '#111128', accent: '#00f0ff' },
-      coastal: { sky1: '#0a1a2a', sky2: '#0a2540', ground: '#0a1520', accent: '#22d3ee' },
-      mountain:{ sky1: '#0a0a20', sky2: '#151530', ground: '#0d0d22', accent: '#a78bfa' },
-      desert:  { sky1: '#1a0f0a', sky2: '#301a0a', ground: '#1a1008', accent: '#fb923c' },
-      arctic:  { sky1: '#0a1520', sky2: '#102030', ground: '#0f1820', accent: '#60a5fa' }
+  // Seeded PRNG for stable, non-flickering element placement
+  function createSeededRNG(seed) {
+    let s = seed;
+    return function () {
+      s = (s * 16807 + 0) % 2147483647;
+      return (s - 1) / 2147483646;
     };
+  }
 
-    const theme = themes[configState.environment] || themes.urban;
+  // Cache for the static scene layer to avoid redrawing every frame
+  let staticSceneCache = null;
+  let lastConfigKey = '';
+
+  function getConfigKey() {
+    return [
+      configState.environment,
+      configState.population,
+      configState.energy,
+      configState.greenery,
+      configState.transport,
+      configState.tech,
+      cityCanvas ? cityCanvas.offsetWidth : 0,
+      cityCanvas ? cityCanvas.offsetHeight : 0
+    ].join('|');
+  }
+
+  // Theme colors based on environment
+  const themes = {
+    urban: { sky1: '#0a0a2a', sky2: '#1a0a30', ground: '#111128', accent: '#00f0ff' },
+    coastal: { sky1: '#0a1a2a', sky2: '#0a2540', ground: '#0a1520', accent: '#22d3ee' },
+    mountain: { sky1: '#0a0a20', sky2: '#151530', ground: '#0d0d22', accent: '#a78bfa' },
+    desert: { sky1: '#1a0f0a', sky2: '#301a0a', ground: '#1a1008', accent: '#fb923c' },
+    arctic: { sky1: '#0a1520', sky2: '#102030', ground: '#0f1820', accent: '#60a5fa' }
+  };
+
+  function renderStaticScene(w, h, scale, theme) {
+    // Create offscreen canvas for static elements
+    const offscreen = document.createElement('canvas');
+    offscreen.width = w;
+    offscreen.height = h;
+    const ctx = offscreen.getContext('2d');
+    const rng = createSeededRNG(42);
 
     // Sky gradient
-    const skyGrad = cityCtx.createLinearGradient(0, 0, 0, h * 0.6);
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.6);
     skyGrad.addColorStop(0, theme.sky1);
     skyGrad.addColorStop(1, theme.sky2);
-    cityCtx.fillStyle = skyGrad;
-    cityCtx.fillRect(0, 0, w, h * 0.6);
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, h * 0.6);
 
-    // Stars
-    const starCount = Math.floor(20 + configState.tech * 0.3);
+    // Stars (stable positions from seeded RNG)
+    const starCount = Math.floor(15 + configState.tech * 0.2);
     for (let i = 0; i < starCount; i++) {
-      const sx = Math.random() * w;
-      const sy = Math.random() * h * 0.5;
-      const ss = Math.random() * 1.5 * scale;
-      cityCtx.beginPath();
-      cityCtx.arc(sx, sy, ss, 0, Math.PI * 2);
-      cityCtx.fillStyle = `rgba(255,255,255,${Math.random() * 0.6 + 0.2})`;
-      cityCtx.fill();
+      const sx = rng() * w;
+      const sy = rng() * h * 0.5;
+      const ss = rng() * 1.2 * scale + 0.3 * scale;
+      const alpha = rng() * 0.5 + 0.15;
+      ctx.beginPath();
+      ctx.arc(sx, sy, ss, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+      ctx.fill();
     }
 
     // Ground
     const groundY = h * 0.6;
-    const groundGrad = cityCtx.createLinearGradient(0, groundY, 0, h);
+    const groundGrad = ctx.createLinearGradient(0, groundY, 0, h);
     groundGrad.addColorStop(0, theme.ground);
     groundGrad.addColorStop(1, theme.sky1);
-    cityCtx.fillStyle = groundGrad;
-    cityCtx.fillRect(0, groundY, w, h - groundY);
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, groundY, w, h - groundY);
 
     // Horizon glow
-    const horizonGrad = cityCtx.createRadialGradient(w / 2, groundY, 0, w / 2, groundY, w * 0.5);
-    horizonGrad.addColorStop(0, theme.accent + '30');
+    const horizonGrad = ctx.createRadialGradient(w / 2, groundY, 0, w / 2, groundY, w * 0.4);
+    horizonGrad.addColorStop(0, theme.accent + '25');
     horizonGrad.addColorStop(1, 'transparent');
-    cityCtx.fillStyle = horizonGrad;
-    cityCtx.fillRect(0, groundY - h * 0.15, w, h * 0.3);
+    ctx.fillStyle = horizonGrad;
+    ctx.fillRect(0, groundY - h * 0.12, w, h * 0.24);
 
-    // Buildings
-    const buildingCount = Math.floor(8 + configState.population * 0.2);
-    const maxHeight = h * 0.15 + (configState.population / 100) * h * 0.35;
+    // Buildings (stable with seeded RNG)
+    const buildingCount = Math.floor(6 + configState.population * 0.15);
+    const maxHeight = h * 0.12 + (configState.population / 100) * h * 0.3;
 
     for (let i = 0; i < buildingCount; i++) {
-      const bx = (i / buildingCount) * w + (Math.random() - 0.5) * w * 0.05;
-      const bw = (15 + Math.random() * 25) * scale;
-      const bh = (30 + Math.random() * maxHeight / scale) * scale;
+      const jitter = (rng() - 0.5) * w * 0.04;
+      const bx = (i / buildingCount) * w + jitter;
+      const bw = (18 + rng() * 22) * scale;
+      const bh = (30 + rng() * maxHeight / scale) * scale;
       const by = groundY - bh;
 
       // Building body
-      const bGrad = cityCtx.createLinearGradient(bx, by, bx + bw, groundY);
-      bGrad.addColorStop(0, `rgba(30, 30, 60, 0.9)`);
-      bGrad.addColorStop(1, `rgba(15, 15, 40, 0.95)`);
-      cityCtx.fillStyle = bGrad;
-      cityCtx.fillRect(bx, by, bw, bh);
+      const bGrad = ctx.createLinearGradient(bx, by, bx + bw, groundY);
+      bGrad.addColorStop(0, 'rgba(30, 30, 60, 0.9)');
+      bGrad.addColorStop(1, 'rgba(15, 15, 40, 0.95)');
+      ctx.fillStyle = bGrad;
+      ctx.fillRect(bx, by, bw, bh);
 
       // Building edge glow
-      cityCtx.strokeStyle = theme.accent + '20';
-      cityCtx.lineWidth = scale;
-      cityCtx.strokeRect(bx, by, bw, bh);
+      ctx.strokeStyle = theme.accent + '15';
+      ctx.lineWidth = scale;
+      ctx.strokeRect(bx, by, bw, bh);
 
-      // Windows
+      // Windows (stable pattern)
       const windowRows = Math.floor(bh / (8 * scale));
       const windowCols = Math.floor(bw / (8 * scale));
       for (let wy = 0; wy < windowRows; wy++) {
         for (let wx = 0; wx < windowCols; wx++) {
-          if (Math.random() > 0.4) {
+          const chance = rng();
+          if (chance > 0.45) {
             const wxx = bx + 3 * scale + wx * 8 * scale;
             const wyy = by + 3 * scale + wy * 8 * scale;
-            const lit = Math.random();
-            cityCtx.fillStyle = lit > 0.5 
-              ? theme.accent + (Math.floor(lit * 80 + 20).toString(16).padStart(2, '0'))
-              : `rgba(255, 200, 100, ${lit * 0.5 + 0.1})`;
-            cityCtx.fillRect(wxx, wyy, 3 * scale, 3 * scale);
+            const lit = rng();
+            ctx.fillStyle = lit > 0.5
+              ? theme.accent + (Math.floor(lit * 60 + 15).toString(16).padStart(2, '0'))
+              : `rgba(255, 200, 100, ${lit * 0.35 + 0.08})`;
+            ctx.fillRect(wxx, wyy, 3 * scale, 3 * scale);
+          } else {
+            rng(); // consume to keep sequence aligned
           }
         }
       }
 
       // Antenna on tall buildings
       if (bh > maxHeight * 0.6 && configState.tech > 50) {
-        cityCtx.strokeStyle = theme.accent + '60';
-        cityCtx.lineWidth = scale;
-        cityCtx.beginPath();
-        cityCtx.moveTo(bx + bw / 2, by);
-        cityCtx.lineTo(bx + bw / 2, by - 15 * scale);
-        cityCtx.stroke();
+        ctx.strokeStyle = theme.accent + '40';
+        ctx.lineWidth = scale;
+        ctx.beginPath();
+        ctx.moveTo(bx + bw / 2, by);
+        ctx.lineTo(bx + bw / 2, by - 12 * scale);
+        ctx.stroke();
 
-        // Blinking light
-        cityCtx.beginPath();
-        cityCtx.arc(bx + bw / 2, by - 15 * scale, 2 * scale, 0, Math.PI * 2);
-        cityCtx.fillStyle = theme.accent;
-        cityCtx.fill();
+        ctx.beginPath();
+        ctx.arc(bx + bw / 2, by - 12 * scale, 1.5 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = theme.accent + 'aa';
+        ctx.fill();
       }
     }
 
-    // Trees / Green coverage
+    // Trees / Green coverage (stable)
     if (configState.greenery > 10) {
-      const treeCount = Math.floor(configState.greenery * 0.3);
+      const treeCount = Math.floor(configState.greenery * 0.2);
       for (let i = 0; i < treeCount; i++) {
-        const tx = Math.random() * w;
-        const ty = groundY - (Math.random() * 5 + 2) * scale;
-        const ts = (3 + Math.random() * 5) * scale;
+        const tx = rng() * w;
+        const ty = groundY - (rng() * 4 + 2) * scale;
+        const ts = (3 + rng() * 4) * scale;
+        const greenVal = 94 + Math.floor(rng() * 50);
 
         // Tree top
-        cityCtx.beginPath();
-        cityCtx.arc(tx, ty - ts, ts, 0, Math.PI * 2);
-        const green = configState.greenery > 50 ? '80' : '50';
-        cityCtx.fillStyle = `rgba(34, 197, ${94 + Math.floor(Math.random() * 50)}, 0.${green})`;
-        cityCtx.fill();
+        ctx.beginPath();
+        ctx.arc(tx, ty - ts, ts, 0, Math.PI * 2);
+        const greenAlpha = configState.greenery > 50 ? '0.55' : '0.35';
+        ctx.fillStyle = `rgba(34, 197, ${greenVal}, ${greenAlpha})`;
+        ctx.fill();
 
         // Trunk
-        cityCtx.fillStyle = 'rgba(100, 70, 40, 0.5)';
-        cityCtx.fillRect(tx - scale, ty - ts * 0.3, 2 * scale, ts * 0.8);
+        ctx.fillStyle = 'rgba(100, 70, 40, 0.35)';
+        ctx.fillRect(tx - scale, ty - ts * 0.3, 2 * scale, ts * 0.6);
       }
     }
 
-    // Flying vehicles (if tech > 40)
+    // Static flying vehicles (stable positions)
     if (configState.tech > 40 && configState.transport === 'aerial') {
-      const vehicleCount = Math.floor(configState.tech * 0.05);
+      const vehicleCount = Math.min(Math.floor(configState.tech * 0.03), 3);
       for (let i = 0; i < vehicleCount; i++) {
-        const vx = Math.random() * w;
-        const vy = h * 0.1 + Math.random() * h * 0.3;
-        cityCtx.beginPath();
-        cityCtx.ellipse(vx, vy, 4 * scale, 1.5 * scale, 0, 0, Math.PI * 2);
-        cityCtx.fillStyle = theme.accent + '80';
-        cityCtx.fill();
+        const vx = rng() * w * 0.8 + w * 0.1;
+        const vy = h * 0.12 + rng() * h * 0.25;
+        ctx.beginPath();
+        ctx.ellipse(vx, vy, 4 * scale, 1.5 * scale, 0, 0, Math.PI * 2);
+        ctx.fillStyle = theme.accent + '60';
+        ctx.fill();
 
         // Trail
-        cityCtx.beginPath();
-        cityCtx.moveTo(vx - 4 * scale, vy);
-        cityCtx.lineTo(vx - 20 * scale, vy);
-        cityCtx.strokeStyle = theme.accent + '20';
-        cityCtx.lineWidth = scale;
-        cityCtx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(vx - 4 * scale, vy);
+        ctx.lineTo(vx - 16 * scale, vy);
+        ctx.strokeStyle = theme.accent + '18';
+        ctx.lineWidth = scale;
+        ctx.stroke();
       }
     }
 
-    // Hyperloop tubes
+    // Hyperloop tube tracks (static part)
     if (configState.transport === 'hyperloop') {
       for (let i = 0; i < 2; i++) {
         const py = groundY - (20 + i * 30) * scale;
-        cityCtx.beginPath();
-        cityCtx.moveTo(0, py);
-        cityCtx.quadraticCurveTo(w / 2, py - 20 * scale, w, py);
-        cityCtx.strokeStyle = theme.accent + '40';
-        cityCtx.lineWidth = 3 * scale;
-        cityCtx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, py);
+        ctx.quadraticCurveTo(w / 2, py - 15 * scale, w, py);
+        ctx.strokeStyle = theme.accent + '25';
+        ctx.lineWidth = 2.5 * scale;
+        ctx.stroke();
+      }
+    }
 
-        // Capsule
-        const cx = (Date.now() / 20 + i * 200) % w;
+    // Teleport beams (static)
+    if (configState.transport === 'teleport') {
+      for (let i = 0; i < 3; i++) {
+        const bx2 = w * 0.2 + (i * w * 0.3);
+        const beamGrad = ctx.createLinearGradient(bx2, 0, bx2, groundY);
+        beamGrad.addColorStop(0, 'transparent');
+        beamGrad.addColorStop(0.3, theme.accent + '08');
+        beamGrad.addColorStop(0.7, theme.accent + '18');
+        beamGrad.addColorStop(1, theme.accent + '04');
+        ctx.fillStyle = beamGrad;
+        ctx.fillRect(bx2 - 3 * scale, 0, 6 * scale, groundY);
+      }
+    }
+
+    // Energy source: Fusion reactor glow (static)
+    if (configState.energy === 'fusion') {
+      ctx.beginPath();
+      const fGrad = ctx.createRadialGradient(w * 0.8, groundY, 0, w * 0.8, groundY, 35 * scale);
+      fGrad.addColorStop(0, theme.accent + '30');
+      fGrad.addColorStop(0.5, theme.accent + '10');
+      fGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = fGrad;
+      ctx.arc(w * 0.8, groundY, 35 * scale, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Energy source: Solar panels (stable positions)
+    if (configState.energy === 'solar') {
+      const solarRng = createSeededRNG(99);
+      for (let i = 0; i < 4; i++) {
+        const sx2 = w * 0.15 + i * w * 0.18;
+        const sy2 = groundY - maxHeight * (0.3 + solarRng() * 0.35);
+        ctx.fillStyle = 'rgba(100, 160, 255, 0.2)';
+        ctx.fillRect(sx2, sy2, 14 * scale, 3 * scale);
+        ctx.strokeStyle = theme.accent + '25';
+        ctx.lineWidth = 0.5 * scale;
+        ctx.strokeRect(sx2, sy2, 14 * scale, 3 * scale);
+      }
+    }
+
+    // Energy source: Wind turbine poles (static part)
+    if (configState.energy === 'wind') {
+      for (let i = 0; i < 3; i++) {
+        const wx2 = w * 0.15 + i * w * 0.3;
+        const wy2 = groundY - 45 * scale;
+        ctx.strokeStyle = 'rgba(200,200,200,0.2)';
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.moveTo(wx2, groundY);
+        ctx.lineTo(wx2, wy2);
+        ctx.stroke();
+
+        // Hub dot
+        ctx.beginPath();
+        ctx.arc(wx2, wy2, 2 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(200,200,220,0.3)';
+        ctx.fill();
+      }
+    }
+
+    return offscreen;
+  }
+
+  function renderCityCanvas() {
+    if (!cityCtx) return;
+
+    const w = cityCanvas.width = cityCanvas.offsetWidth * (window.devicePixelRatio || 1);
+    const h = cityCanvas.height = cityCanvas.offsetHeight * (window.devicePixelRatio || 1);
+    const scale = w / 600;
+    const theme = themes[configState.environment] || themes.urban;
+    const groundY = h * 0.6;
+
+    // Rebuild static cache if config changed
+    const currentKey = getConfigKey();
+    if (currentKey !== lastConfigKey) {
+      staticSceneCache = renderStaticScene(w, h, scale, theme);
+      lastConfigKey = currentKey;
+    }
+
+    // Draw cached static scene
+    cityCtx.clearRect(0, 0, w, h);
+    if (staticSceneCache) {
+      cityCtx.drawImage(staticSceneCache, 0, 0);
+    }
+
+    // --- Animated overlay elements (only these update per frame) ---
+
+    const now = Date.now();
+
+    // Animated: Hyperloop capsules (very slow glide)
+    if (configState.transport === 'hyperloop') {
+      for (let i = 0; i < 2; i++) {
+        const py = groundY - (20 + i * 30) * scale;
+        // Slow speed: divide by 80 instead of 20
+        const cx = (now / 80 + i * 350) % w;
+        // Calculate Y offset along the curve
+        const t = cx / w;
+        const curveY = py - 15 * scale * 4 * t * (1 - t);
         cityCtx.beginPath();
-        cityCtx.ellipse(cx, py - 5 * scale, 8 * scale, 3 * scale, 0, 0, Math.PI * 2);
-        cityCtx.fillStyle = theme.accent + '90';
+        cityCtx.ellipse(cx, curveY - 3 * scale, 6 * scale, 2.5 * scale, 0, 0, Math.PI * 2);
+        cityCtx.fillStyle = theme.accent + '70';
+        cityCtx.fill();
+        // Subtle glow
+        cityCtx.beginPath();
+        cityCtx.ellipse(cx, curveY - 3 * scale, 10 * scale, 4 * scale, 0, 0, Math.PI * 2);
+        cityCtx.fillStyle = theme.accent + '10';
         cityCtx.fill();
       }
     }
 
-    // Teleport beams
-    if (configState.transport === 'teleport') {
-      for (let i = 0; i < 3; i++) {
-        const bx2 = w * 0.2 + (i * w * 0.3);
-        const beamGrad = cityCtx.createLinearGradient(bx2, 0, bx2, groundY);
-        beamGrad.addColorStop(0, 'transparent');
-        beamGrad.addColorStop(0.3, theme.accent + '10');
-        beamGrad.addColorStop(0.7, theme.accent + '30');
-        beamGrad.addColorStop(1, theme.accent + '05');
-        cityCtx.fillStyle = beamGrad;
-        cityCtx.fillRect(bx2 - 3 * scale, 0, 6 * scale, groundY);
-      }
-    }
-
-    // Energy source overlay
-    if (configState.energy === 'fusion') {
-      // Fusion reactor glow
-      cityCtx.beginPath();
-      const fGrad = cityCtx.createRadialGradient(w * 0.8, groundY, 0, w * 0.8, groundY, 40 * scale);
-      fGrad.addColorStop(0, theme.accent + '40');
-      fGrad.addColorStop(0.5, theme.accent + '15');
-      fGrad.addColorStop(1, 'transparent');
-      cityCtx.fillStyle = fGrad;
-      cityCtx.arc(w * 0.8, groundY, 40 * scale, 0, Math.PI * 2);
-      cityCtx.fill();
-    }
-
-    if (configState.energy === 'solar') {
-      // Solar panels on rooftops
-      for (let i = 0; i < 5; i++) {
-        const sx2 = w * 0.15 + i * w * 0.15;
-        const sy2 = groundY - maxHeight * (0.3 + Math.random() * 0.4);
-        cityCtx.fillStyle = `rgba(100, 160, 255, 0.3)`;
-        cityCtx.fillRect(sx2, sy2, 15 * scale, 4 * scale);
-        cityCtx.strokeStyle = theme.accent + '40';
-        cityCtx.lineWidth = 0.5 * scale;
-        cityCtx.strokeRect(sx2, sy2, 15 * scale, 4 * scale);
-      }
-    }
-
+    // Animated: Wind turbine blades (gentle spin)
     if (configState.energy === 'wind') {
-      // Wind turbines
-      for (let i = 0; i < 4; i++) {
-        const wx2 = w * 0.1 + i * w * 0.25;
-        const wy2 = groundY - 50 * scale;
-        // Pole
-        cityCtx.strokeStyle = 'rgba(200,200,200,0.3)';
-        cityCtx.lineWidth = 2 * scale;
-        cityCtx.beginPath();
-        cityCtx.moveTo(wx2, groundY);
-        cityCtx.lineTo(wx2, wy2);
-        cityCtx.stroke();
-        // Blades
+      for (let i = 0; i < 3; i++) {
+        const wx2 = w * 0.15 + i * w * 0.3;
+        const wy2 = groundY - 45 * scale;
         for (let b = 0; b < 3; b++) {
-          const angle = (b * Math.PI * 2 / 3) + (Date.now() / 1000);
+          // Very slow rotation: divide by 4000 instead of 1000
+          const angle = (b * Math.PI * 2 / 3) + (now / 4000) + (i * 0.8);
           cityCtx.beginPath();
           cityCtx.moveTo(wx2, wy2);
-          cityCtx.lineTo(wx2 + Math.cos(angle) * 20 * scale, wy2 + Math.sin(angle) * 20 * scale);
-          cityCtx.strokeStyle = 'rgba(200,200,255,0.4)';
-          cityCtx.lineWidth = 1.5 * scale;
+          cityCtx.lineTo(wx2 + Math.cos(angle) * 18 * scale, wy2 + Math.sin(angle) * 18 * scale);
+          cityCtx.strokeStyle = 'rgba(200,200,255,0.25)';
+          cityCtx.lineWidth = 1.2 * scale;
           cityCtx.stroke();
+        }
+      }
+    }
+
+    // Animated: Subtle antenna blink (slow pulse)
+    if (configState.tech > 50) {
+      const blinkAlpha = 0.3 + Math.sin(now / 1500) * 0.3;
+      const buildingCount = Math.floor(6 + configState.population * 0.15);
+      const maxHeight = h * 0.12 + (configState.population / 100) * h * 0.3;
+      const rng = createSeededRNG(42);
+      // Skip through RNG to find antenna positions (must match static scene)
+      // Consume star RNG calls
+      const starCount = Math.floor(15 + configState.tech * 0.2);
+      for (let i = 0; i < starCount; i++) { rng(); rng(); rng(); rng(); }
+
+      for (let i = 0; i < buildingCount; i++) {
+        rng(); // jitter
+        const bx = (i / buildingCount) * w + 0; // don't need exact - just the antenna center
+        const bw = (18 + rng() * 22) * scale;
+        rng(); // consume bw rng
+        const bh = (30 + rng() * maxHeight / scale) * scale;
+        const by = groundY - bh;
+
+        // Skip window RNG calls
+        const windowRows = Math.floor(bh / (8 * scale));
+        const windowCols = Math.floor(bw / (8 * scale));
+        for (let wy = 0; wy < windowRows; wy++) {
+          for (let wx = 0; wx < windowCols; wx++) {
+            rng(); rng(); // chance + lit
+          }
+        }
+
+        // Only blink top-most antenna lights
+        if (bh > maxHeight * 0.6) {
+          const ax = (i / buildingCount) * w + (0) + bw / 2; // approximate
+          cityCtx.beginPath();
+          cityCtx.arc(ax, by - 12 * scale, 1.5 * scale, 0, Math.PI * 2);
+          cityCtx.fillStyle = theme.accent + Math.floor(blinkAlpha * 255).toString(16).padStart(2, '0');
+          cityCtx.fill();
         }
       }
     }
@@ -641,28 +764,36 @@
 
   // Initial render
   if (cityCanvas) {
-    // Wait for container to have dimensions
     setTimeout(() => {
       renderCityCanvas();
     }, 100);
-    window.addEventListener('resize', debounce(renderCityCanvas, 200));
+    window.addEventListener('resize', debounce(() => {
+      lastConfigKey = ''; // Force cache invalidation on resize
+      renderCityCanvas();
+    }, 200));
   }
 
-  // Animate city canvas for dynamic effects
+  // Animate city canvas — only runs when configurator is visible
+  // Uses a slower update rate (~20fps) since only subtle elements animate
   if (cityCanvas && !prefersReducedMotion) {
     let cityAnimFrame;
-    function animateCity() {
-      renderCityCanvas();
+    let lastCityFrame = 0;
+    const CITY_FRAME_INTERVAL = 50; // ~20fps, much gentler
+
+    function animateCity(timestamp) {
+      if (timestamp - lastCityFrame >= CITY_FRAME_INTERVAL) {
+        lastCityFrame = timestamp;
+        renderCityCanvas();
+      }
       cityAnimFrame = requestAnimationFrame(animateCity);
     }
-    
-    // Start animation when configurator is visible
+
     const configSection = document.getElementById('configurator');
     if (configSection) {
       const configObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            animateCity();
+            cityAnimFrame = requestAnimationFrame(animateCity);
           } else {
             cancelAnimationFrame(cityAnimFrame);
           }
@@ -682,10 +813,10 @@
     saveCityBtn.addEventListener('click', () => {
       const name = cityNameInput.value.trim() || 'Unnamed City';
       const scores = computeScores();
-      
+
       // Show toast
       showToast(`"${name}" blueprint saved! Livability: ${scores.livability}`);
-      
+
       // Haptic-like button feedback
       saveCityBtn.style.transform = 'scale(0.95)';
       setTimeout(() => {
